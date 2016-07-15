@@ -2,7 +2,7 @@ require_relative 'board.rb'
 
 class Game
   attr_reader :board
-  
+
   def initialize(board)
     @board = board
   end
@@ -19,31 +19,39 @@ class Game
 
     if board.lost?
       puts "You lose"
-    else
+    elsif board.won?
       puts "You win!"
     end
   end
 
   def play_turn
-    get_pos
-    board.spread_area
-    perform_move
+    pos = get_pos
+    board.spread_area(pos)
+    perform_move(pos, get_action)
     board.render
   end
 
   def get_pos
     puts "Pick your position"
     pos = parse_pos(gets.chomp)
+  end
+
+  def get_action
     puts "What do you want to do with it? (T for turn, F for flag)"
     action = gets.chomp
   end
 
+
   def perform_move(pos, action)
     if action == "T"
-      board[pos].flip
+      board[*pos].flip
     elsif action == "F"
-      board[pos].flag
+      board[*pos].flag
     end
+  end
+
+  def parse_pos(pos)
+    pos.split(',').map(&:to_i)
   end
 
 end

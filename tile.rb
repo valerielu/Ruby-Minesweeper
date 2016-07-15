@@ -5,12 +5,11 @@ class Tile
   attr_accessor :value
 
   def initialize(value = " ")
-    @value = @flipped
-    @flipped = false, @bombed = false, @flagged = false
+    @value = value
+    @flipped = false
+    @bombed = false
+    @flagged = false
   end
-
-
-
 
   def bombed?
     @bombed
@@ -25,7 +24,10 @@ class Tile
   end
 
   def bomb
+
+
     @bombed = true
+
   end
 
   def flag
@@ -35,6 +37,9 @@ class Tile
   def flip
     @flipped = true
 
+    # if !bombed? && num_adjacent_bombs == 0
+    #     neighbors.each { |tile| tile.flip}
+    # end
   end
 
   def display
