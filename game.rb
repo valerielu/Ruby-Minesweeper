@@ -18,7 +18,14 @@ class Game
     end
 
     if board.lost?
-      puts "You lose"
+      puts "That's a bomb!"
+      (0..8).each do |i|
+        (0..8).each do |j|
+          board[*[i, j]].flip
+        end
+      end
+      board.render
+
     elsif board.won?
       puts "You win!"
     end
@@ -26,7 +33,6 @@ class Game
 
   def play_turn
     pos = get_pos
-    board.spread_area(pos)
     perform_move(pos, get_action)
     board.render
   end
@@ -37,14 +43,14 @@ class Game
   end
 
   def get_action
-    puts "What do you want to do with it? (T for turn, F for flag)"
-    action = gets.chomp
+    puts "What do you want to do with it? (R for reveal, F for flag)"
+    action = gets.chomp.upcase
   end
 
 
   def perform_move(pos, action)
-    if action == "T"
-      board[*pos].flip
+    if action == "R"
+      board.flip_tile(pos)
     elsif action == "F"
       board[*pos].flag
     end

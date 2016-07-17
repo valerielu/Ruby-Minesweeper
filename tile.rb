@@ -24,10 +24,8 @@ class Tile
   end
 
   def bomb
-
-
     @bombed = true
-
+    @value = "*"
   end
 
   def flag
@@ -36,17 +34,13 @@ class Tile
 
   def flip
     @flipped = true
-
-    # if !bombed? && num_adjacent_bombs == 0
-    #     neighbors.each { |tile| tile.flip}
-    # end
   end
 
   def display
     if self.flipped?
-      "#{@value}"
+      "#{@value == "*" ? @value.to_s.colorize(:red) : @value.to_s.colorize(:green)}"
     elsif self.flagged?
-      "F"
+      "F".colorize(:yellow)
     else
       "#"
     end

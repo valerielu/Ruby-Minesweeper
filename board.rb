@@ -18,6 +18,7 @@ class Board
   end
 
   def inspect
+    #over-writing inspect so it doesnt show us the whole board when looking at one tile
   end
 
   def populate_board
@@ -28,12 +29,11 @@ class Board
 
   def plant_bombs
     bombs = 0
-    @bomb_coord = []
+    bomb_coord = []
     until bombs == grid.length + 1
       coord = [rand(0..8),rand(0..8)]
       next if self[*coord].bombed?
-      @bomb_coord << coord
-      self[*coord] = "*"
+      bomb_coord << coord
       self[*coord].bomb
       bombs += 1
     end
@@ -52,61 +52,22 @@ class Board
     neighbors = [top_left, top, top_right, right, bottom_right, bottom, bottom_left, left]
     selected_neighbors = neighbors.select { |coord| coord[0].between?(0, 8) && coord[1].between?(0, 8)}
     selected_neighbors
-
   end
-
-
-  def not_in_all_checked(array)
-    array.reject {|el| @all_checked.include?(el)}
-  end
-
-  def spread_area(pos)
-    @all_checked = [pos]
-    fringe = []
-    @current_neighbors = neighbors(pos)
-
-    until @current_neighbors.empty?
-      byebug
-      @all_checked += not_in_all_checked(@current_neighbors)
-      new_neighbors = []
-      @current_neighbors.each do |one|
-        fringe << one if self[*one].value.is_a?(Integer)
-        new_neighbors += not_in_all_checked(neighbors(one))
-      end
-      @all_checked += not_in_all_checked(new_neighbors)
-      @all_checked += not_in_all_checked(fringe)
-      @current_neighbors = new_neighbors
-    end
-
-    @all_checked.each do |positions|
-      self[*positions].flip
-    end
-
-
-    #
-    #
-    # new_neighbors.each do |i|
-    #   spread_area(i) unless @all_checked.empty?
-    # end
-    #
-    # @all_checked.each do |i|
-    #   grid[i].flip
-    # end
-
-
-
-      # new_neighbors.each do |i|
-      #   @all_checked += i unless @all_checked.include?(i)
-      #   spread_area(i)
-      # end
-      #
-      # @all_checked.each do |i|
-      #   grid[i].flip
-      # end
-
-
-
-
+  # def spread_area(pos)
+  #   return [pos] if self[*pos].value.is_a?(Integer)
+  #   result = []
+  #   neighbors(pos).each do |neighbor|
+  #     result += spread_area(neighbor)
+  #   end
+  # end
+  #
+  #
+  #
+  # def flip_spread(array)
+  #   array.each do |arr|
+  #     self[*arr].flip
+  #   end
+  # end
 
 
 
@@ -125,11 +86,6 @@ class Board
     #       end
     #     end
     #   end
-
-  end
-
-
-
 
 
   def num_adjacent_bombs(pos)
@@ -150,9 +106,19 @@ class Board
     end
   end
 
+  def flip_tile(pos)
+    return self[*pos] if self[*pos].flipped?
+    return self[*pos] if self[*pos].flagged?
+    self[*pos].flip
+    if !self[*pos].bombed? && num_adjacent_bombs(pos) == 0
+      neighbors(pos).each {|pos| flip_tile(pos)}
+    end
+  end
+
   def render
-    grid.each do |row|
-      puts row.map { |tile| tile.display }.join(' ')
+      puts "    " + (0..8).to_a.join(" ")
+    grid.each_with_index do |row, i|
+      puts "#{i} | " + row.map { |tile| tile.display }.join(' ')
     end
   end
 
@@ -161,8 +127,7 @@ class Board
   end
 
   def won?
-    return false if grid.flatten.none? { |el| el.flipped? }
-    grid.flatten.reject { |el| el.bombed? }.all? { |tile| tile.flipped? }
+    grid.flatten.any? { |tile| tile.bombed? && tile.flipped? }
   end
 
 end
